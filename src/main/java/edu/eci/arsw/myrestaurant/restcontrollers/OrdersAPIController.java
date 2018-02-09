@@ -16,15 +16,20 @@
  */
 package edu.eci.arsw.myrestaurant.restcontrollers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.eci.arsw.myrestaurant.model.Order;
 import edu.eci.arsw.myrestaurant.model.ProductType;
 import edu.eci.arsw.myrestaurant.model.RestaurantProduct;
+import edu.eci.arsw.myrestaurant.services.OrderServicesException;
 import edu.eci.arsw.myrestaurant.services.RestaurantOrderServices;
 import edu.eci.arsw.myrestaurant.services.RestaurantOrderServicesStub;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,19 +55,19 @@ public class OrdersAPIController {
             
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<?> manejadorGetRecursoOrdersAPI(){
-            try {   
-                    Set<Integer> set = rOS.getTablesWithOrders();
-                    Map<Integer,String> mapOrders = new ConcurrentHashMap<>();
-                    for(Integer i: set){
-                        mapOrders.put(i, rOS.getTableOrder(i.intValue()).toString());
-                    }
-                    
-                    //obtener datos que se enviarán a través del API
-                    return new ResponseEntity<>(mapsOrders,HttpStatus.ACCEPTED);
-            } catch (OrderServicesException ex) {
-                    Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
-                    return new ResponseEntity<>("Error bla bla bla",HttpStatus.NOT_FOUND);
-            }  
-    }      
-    
+        try {   
+            //obtener datos que se enviarán a través del API
+            Set<Integer> set = rOS.getTablesWithOrders();
+            Map<Integer,String> mapOrders = new ConcurrentHashMap<>();
+            for(Integer i: set){
+                mapOrders.put(i, rOS.getTableOrder(i).toString());
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(mapOrders);
+            return new ResponseEntity<>(json,HttpStatus.ACCEPTED);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
+            return new ResponseEntity<>("Error Creando el Json",HttpStatus.NOT_FOUND);
+        }      
+    }
 }
