@@ -19,12 +19,16 @@ package edu.eci.arsw.myrestaurant.restcontrollers;
 import edu.eci.arsw.myrestaurant.model.Order;
 import edu.eci.arsw.myrestaurant.model.ProductType;
 import edu.eci.arsw.myrestaurant.model.RestaurantProduct;
+import edu.eci.arsw.myrestaurant.services.RestaurantOrderServices;
 import edu.eci.arsw.myrestaurant.services.RestaurantOrderServicesStub;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,7 +38,31 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author hcadavid
  */
-public class OrdersAPIController {
 
+
+@Service
+@RestController
+@RequestMapping(value = "/orders")
+public class OrdersAPIController {
+    
+    @Autowired
+    private RestaurantOrderServices rOS;
+            
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<?> manejadorGetRecursoOrdersAPI(){
+            try {   
+                    Set<Integer> set = rOS.getTablesWithOrders();
+                    Map<Integer,String> mapOrders = new ConcurrentHashMap<>();
+                    for(Integer i: set){
+                        mapOrders.put(i, rOS.getTableOrder(i.intValue()).toString());
+                    }
+                    
+                    //obtener datos que se enviarán a través del API
+                    return new ResponseEntity<>(mapsOrders,HttpStatus.ACCEPTED);
+            } catch (OrderServicesException ex) {
+                    Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
+                    return new ResponseEntity<>("Error bla bla bla",HttpStatus.NOT_FOUND);
+            }  
+    }      
     
 }
