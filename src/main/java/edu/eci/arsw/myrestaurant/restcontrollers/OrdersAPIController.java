@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -69,5 +70,28 @@ public class OrdersAPIController {
             Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
             return new ResponseEntity<>("Error Creando el Json",HttpStatus.NOT_FOUND);
         }      
+    }
+    
+    @RequestMapping(value="/{idmesa}")
+    public ResponseEntity<?> manejadorGetOrder(@PathVariable Integer idmesa){
+        try {   
+            //obtener datos que se enviarán a través del API
+            Map<Integer,String> mapOrders = new ConcurrentHashMap<>();
+            Order o = rOS.getTableOrder(idmesa);
+            if (o != null){
+                mapOrders.put(idmesa, o.toString());
+                ObjectMapper mapper = new ObjectMapper();
+                String json = mapper.writeValueAsString(mapOrders);
+                return new ResponseEntity<>(json,HttpStatus.ACCEPTED);
+            }
+            else{
+                return new ResponseEntity<>("La mesa no existe o no tiene una orden asociada",HttpStatus.NOT_FOUND);
+            }
+            
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
+            return new ResponseEntity<>("Error Creando el Json",HttpStatus.NOT_FOUND);
+        }
+    
     }
 }
