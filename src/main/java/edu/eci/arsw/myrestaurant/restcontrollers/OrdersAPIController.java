@@ -24,6 +24,7 @@ import edu.eci.arsw.myrestaurant.model.RestaurantProduct;
 import edu.eci.arsw.myrestaurant.services.OrderServicesException;
 import edu.eci.arsw.myrestaurant.services.RestaurantOrderServices;
 import edu.eci.arsw.myrestaurant.services.RestaurantOrderServicesStub;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -59,9 +60,9 @@ public class OrdersAPIController {
         try {   
             //obtener datos que se enviarán a través del API
             Set<Integer> set = rOS.getTablesWithOrders();
-            Map<Integer,String> mapOrders = new ConcurrentHashMap<>();
+            Map<Integer,Order> mapOrders = new ConcurrentHashMap<>();
             for(Integer i: set){
-                mapOrders.put(i, rOS.getTableOrder(i).toString());
+                mapOrders.put(i, rOS.getTableOrder(i));
             }
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(mapOrders);
@@ -76,10 +77,10 @@ public class OrdersAPIController {
     public ResponseEntity<?> manejadorGetOrder(@PathVariable Integer idmesa){
         try {   
             //obtener datos que se enviarán a través del API
-            Map<Integer,String> mapOrders = new ConcurrentHashMap<>();
+            Map<Integer,Order> mapOrders = new ConcurrentHashMap<>();
             Order o = rOS.getTableOrder(idmesa);
             if (o != null){
-                mapOrders.put(idmesa, o.toString());
+                mapOrders.put(idmesa, o);
                 ObjectMapper mapper = new ObjectMapper();
                 String json = mapper.writeValueAsString(mapOrders);
                 return new ResponseEntity<>(json,HttpStatus.ACCEPTED);
@@ -94,4 +95,21 @@ public class OrdersAPIController {
         }
     
     }
+    
+    @RequestMapping(method = RequestMethod.POST)	
+	public ResponseEntity<?> manejadorPostRecursoOrder(@RequestBody String o){
+		try {
+                    //registrar dato
+                    ObjectMapper mapper = new ObjectMapper();
+                    Order newOrder = mapper.readValue(o, Order.class);
+                    rOS.addNewOrderToTable(newOrder);
+                    return new ResponseEntity<>(HttpStatus.CREATED);
+		} catch (IOException ex) {
+                    Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
+                    return new ResponseEntity<>("Error en entrada",HttpStatus.FORBIDDEN);            
+		} catch (OrderServicesException ex) {        
+                    Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
+        }           return new ResponseEntity<>("Se produjo un error en la orden",HttpStatus.FORBIDDEN);            
+	
+	}
 }
