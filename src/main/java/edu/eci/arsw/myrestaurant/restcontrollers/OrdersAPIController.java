@@ -110,6 +110,19 @@ public class OrdersAPIController {
 		} catch (OrderServicesException ex) {        
                     Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
         }           return new ResponseEntity<>("Se produjo un error en la orden",HttpStatus.FORBIDDEN);            
-	
-	}
+    }
+     
+    @RequestMapping(value="/{idmesa}/total")
+    public ResponseEntity<?> manejadorGetOrderTotal(@PathVariable Integer idmesa){
+        try {   
+            //obtener datos que se enviarán a través del API
+            Map<Integer,Order> mapOrders = new ConcurrentHashMap<>();
+            int o = rOS.calculateTableBill(idmesa);
+                return new ResponseEntity<>(o,HttpStatus.ACCEPTED);
+        } catch (OrderServicesException ex) {
+            Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
+            return new ResponseEntity<>("La mesa no existe o no tiene una orden asociada",HttpStatus.NOT_FOUND);
+        }
+    
+    }
 }
