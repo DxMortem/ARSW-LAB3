@@ -127,17 +127,21 @@ public class OrdersAPIController {
     }
     
     @RequestMapping(value="/{idmesa}", method = RequestMethod.PUT)	
-	public ResponseEntity<?> manejadorPutRecursoProduct(@RequestBody String o, @PathVariable Integer idmesa, @PathVariable Integer cantidad){
-		try {
-                    //registrar dato
-                    ObjectMapper mapper = new ObjectMapper();
-                    RestaurantProduct newProduct = mapper.readValue(o, RestaurantProduct.class);
-                    rOS.getTableOrder(idmesa).addDish(newProduct.getName(), cantidad);
-                    return new ResponseEntity<>(HttpStatus.CREATED);
-		} catch (IOException ex) {
-                    Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
-                    return new ResponseEntity<>("Error en entrada",HttpStatus.FORBIDDEN);            
-		}           
+    public ResponseEntity<?> manejadorPutRecursoProduct(@RequestBody String o, @PathVariable Integer idmesa){
+            try {
+                //registrar dato
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String,Integer>  newProduct = mapper.readValue(o, ConcurrentHashMap.class);
+                Set<String> productos = newProduct.keySet();
+                Order orden = rOS.getTableOrder(idmesa);
+                for(String i:productos){
+                    orden.addDish(i, newProduct.get(i));
+                }
+                return new ResponseEntity<>(HttpStatus.CREATED);
+            } catch (IOException ex) {
+                Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
+                return new ResponseEntity<>("Error en entrada",HttpStatus.FORBIDDEN);            
+            }           
     }
         
     @RequestMapping(method = RequestMethod.DELETE, value="/{idmesa}")
