@@ -1,0 +1,4 @@
+Las posibles inconsistencias que pueden presentarse en este API son: 
+-Consultar una orden que haya sido eliminada o modificada dada la concición de carrera.
+-De la situación anterior, un usuario podría querer agregar un producto a una orden que ya no existe, lo cual causaría un error.
+-Otra situación derivada es que un usuario cree una nueva orden, luego quiera agregar productos a esta, pero otro usuario ya la pudo haber modificado o borrado.

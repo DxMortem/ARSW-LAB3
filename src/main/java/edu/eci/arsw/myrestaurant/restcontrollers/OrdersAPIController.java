@@ -125,4 +125,34 @@ public class OrdersAPIController {
         }
     
     }
+    
+    @RequestMapping(value="/{idmesa}", method = RequestMethod.PUT)	
+	public ResponseEntity<?> manejadorPutRecursoProduct(@RequestBody String o, @PathVariable Integer idmesa, @PathVariable Integer cantidad){
+		try {
+                    //registrar dato
+                    ObjectMapper mapper = new ObjectMapper();
+                    RestaurantProduct newProduct = mapper.readValue(o, RestaurantProduct.class);
+                    rOS.getTableOrder(idmesa).addDish(newProduct.getName(), cantidad);
+                    return new ResponseEntity<>(HttpStatus.CREATED);
+		} catch (IOException ex) {
+                    Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
+                    return new ResponseEntity<>("Error en entrada",HttpStatus.FORBIDDEN);            
+		}           
+    }
+        
+    @RequestMapping(method = RequestMethod.DELETE, value="/{idmesa}")
+    public ResponseEntity<?> manejadorDeleteRecursoOrder(@PathVariable Integer idmesa){
+        try {   
+            int o = rOS.calculateTableBill(idmesa);
+            rOS.releaseTable(idmesa);
+                return new ResponseEntity<>(o,HttpStatus.ACCEPTED);
+        } catch (OrderServicesException ex) {
+            Logger.getLogger(OrdersAPIController.class.getName()).log(Level.SEVERE, null, ex);
+            return new ResponseEntity<>("La mesa no existe o no tiene una orden asociada",HttpStatus.NOT_FOUND);
+        }
+    
+    }
+        
+        
+    
 }
